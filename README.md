@@ -1,25 +1,5 @@
 ![](screenshots/banner.png)
 
-<head>
-<link href='https://fonts.googleapis.com/css?family=EB Garamond' rel='stylesheet'>
-
-<style>
-  .content {
-    max-width: 1000px;
-    margin: auto;
-  }
-
-  body {
-    font-family: "Times New Roman";
-    font-size: 22px;
-    color: black;
-    background-color: #FFF;
-  }
-</style>
-</head>
-
-<div class="content">
-
 > **Owner** : 🧛🏻‍♂️ - Mr. Sup3rN0va | 06-February-2021
 
 > **Tags** : #ssh (💻), #pentesting (👨🏼‍💻), #tools (⚒), #cheatsheet (📜)
