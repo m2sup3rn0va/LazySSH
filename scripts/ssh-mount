@@ -1,0 +1,99 @@
+#! /usr/bin/python3
+
+import paramiko
+import os
+import sys
+import argparse
+import subprocess
+
+def check_arg(args=None):
+    argParser = argparse.ArgumentParser(description='Mount File System Using SSH')
+    argParser.add_argument('-n', '--conn_name',
+                        help='Connection Name',
+                        required='True')
+
+    return argParser.parse_args(args)
+
+def mount_ssh(args):
+
+    HOME = os.environ['HOME']
+    configFile = HOME + "/.ssh/config"
+
+    try:
+        configFileParser = paramiko.SSHConfig.from_file(open(configFile))
+    except:
+        print("Error: Issue with config file. Please check at : ", configFile)
+        exit(0)
+
+    try:
+        userName = str(configFileParser.lookup(args.conn_name)['user'])
+    except:
+        print("Error: No Username for the connection")
+        exit(0)
+
+    try:
+        IP = str(configFileParser.lookup(args.conn_name)['hostname'])
+    except:
+        print("Error: No IP for the connection")
+        exit(0)
+
+    try:
+        port = str(configFileParser.lookup(args.conn_name)['port'])
+    except:
+        print("Info: Using default port : 22")
+        port = '22'
+
+    try:
+        identityFile = ''
+        identityFile = str(configFileParser.lookup(args.conn_name)['identityfile'][0])
+    except:
+        print("Info: Identity File not found. You will be prompted for password while mounting..")
+
+    remoteFolder = 'Remote_' + args.conn_name
+    localFolder = 'Local_' + args.conn_name
+
+    remoteFolderPath = ''
+    localFolderPath = ''
+
+    tempConfigFile = open(configFile, 'r')
+    for configLine in tempConfigFile:
+        if remoteFolder in configLine:
+            remoteFolderPath = configLine.split(' ')[1].split('\n')[0]
+            break
+
+    tempConfigFile = open(configFile, 'r')
+    for configLine in tempConfigFile:
+        if localFolder in configLine:
+            localFolderPath = configLine.split(' ')[1].split('\n')[0]
+            break
+
+    if remoteFolderPath == '' or '~' in remoteFolderPath or '$' in remoteFolderPath:
+        print("Error: Path should not be empty or contain '~' or '$'. Please check config : ", configFile)
+        exit(0)
+
+    if localFolderPath == '' or '~' in localFolderPath or '$' in localFolderPath:
+        print("Error: Path should not be empty or contain '~' or '$'. Please check config : ", configFile)
+        exit(0)
+
+    # Check if this is already mounted
+    if not os.path.exists(localFolderPath):
+        print('Info: Mounting SSH Drive to : ', localFolderPath)
+        cmd = 'mkdir ' + localFolderPath
+        subprocess.call([cmd], shell=True)
+
+        cmd = ''
+        if identityFile == '':
+            cmd = 'sshfs -o idmap=user -p ' + port + ' ' + userName + '@' + IP + ':' + remoteFolderPath + ' ' + localFolderPath
+        else:
+            cmd = 'sshfs -o idmap=user -o IdentityFile=' + identityFile + ' -p ' + port + ' ' + userName + '@' + IP + ':' + remoteFolderPath + ' ' + localFolderPath
+
+        subprocess.call([cmd], shell=True)
+
+    else:
+        print('Error: Can\'t Mount. Folder already exists')
+        exit(0)
+
+if __name__ == '__main__':
+
+    args = check_arg(sys.argv[1:])
+    mount_ssh(args)
