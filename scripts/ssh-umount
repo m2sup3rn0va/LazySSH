@@ -1,0 +1,49 @@
+#! /usr/bin/python3
+
+import paramiko
+import os
+import sys
+import argparse
+import subprocess
+
+def check_arg(args=None):
+    argParser = argparse.ArgumentParser(description='Umount SSH File System')
+    argParser.add_argument('-n', '--conn_name',
+                        help='Connection Name',
+                        required='True')
+
+    return argParser.parse_args(args)
+
+def mount_ssh(args):
+
+    HOME = os.environ['HOME']
+    configFile = HOME + "/.ssh/config"
+
+    configFileParser = paramiko.SSHConfig.from_file(open(configFile))
+
+    localFolder = 'Local_' + args.conn_name
+
+    tempConfigFile = open(configFile, 'r')
+    for configLine in tempConfigFile:
+        if localFolder in configLine:
+            localFolderPath = configLine.split(' ')[1].split('\n')[0]
+            break
+
+    # Check if this is already mounted
+    if os.path.exists(localFolderPath):
+        print('Umounting SSH Drive from : ', localFolderPath)
+        cmd = 'fusermount -u ' + localFolderPath
+        subprocess.call([cmd], shell=True)
+        cmd = 'rmdir ' + localFolderPath
+        subprocess.call([cmd], shell=True)
+
+    else:
+        print('Error: Can\'t Umount. Mount folder not found')
+        exit(0)
+
+
+if __name__ == '__main__':
+
+    args = check_arg(sys.argv[1:])
+    mount_ssh(args)
+
