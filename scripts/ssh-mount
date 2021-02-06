@@ -9,7 +9,7 @@ import subprocess
 def check_arg(args=None):
     argParser = argparse.ArgumentParser(description='Mount File System Using SSH')
     argParser.add_argument('-n', '--conn_name',
-                        help='Connection Name',
+                        help='Connection Name: In config file - Host <Connection Name>',
                         required='True')
 
     return argParser.parse_args(args)
