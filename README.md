@@ -146,6 +146,9 @@
   - Path of remote drive should mandatory start with : `# Remote_` and then the name of the host i.e `b0x` and same goes for local as well
   - With this, the python script detects what to mount and where to mount
   - Also, it't important to note that the path mentioned will not accept `~` or `$` sign and you need to provide complete path
+- **Reference**:
+  - [**SSH File Transfers**](https://help.ubuntu.com/community/SSH/TransferFiles)
+  - [**SSHFS**](https://help.ubuntu.com/community/SSHFS)
 
 ---
 
