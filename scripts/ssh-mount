@@ -58,13 +58,13 @@ def mount_ssh(args):
     tempConfigFile = open(configFile, 'r')
     for configLine in tempConfigFile:
         if remoteFolder in configLine:
-            remoteFolderPath = configLine.split(' ')[1].split('\n')[0]
+            remoteFolderPath = configLine.split(' ')[4].split('\n')[0]
             break
 
     tempConfigFile = open(configFile, 'r')
     for configLine in tempConfigFile:
         if localFolder in configLine:
-            localFolderPath = configLine.split(' ')[1].split('\n')[0]
+            localFolderPath = configLine.split(' ')[4].split('\n')[0]
             break
 
     if remoteFolderPath == '' or '~' in remoteFolderPath or '$' in remoteFolderPath:
