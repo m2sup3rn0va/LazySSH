@@ -6,6 +6,7 @@ import sys
 import argparse
 import subprocess
 
+
 def check_arg(args=None):
     argParser = argparse.ArgumentParser(description='Umount SSH File System')
     argParser.add_argument('-n', '--conn_name',
@@ -14,31 +15,50 @@ def check_arg(args=None):
 
     return argParser.parse_args(args)
 
+
 def mount_ssh(args):
 
     HOME = os.environ['HOME']
     configFile = HOME + "/.ssh/config"
 
-    configFileParser = paramiko.SSHConfig.from_file(open(configFile))
+    try:
+        configFileParser = paramiko.SSHConfig.from_file(open(configFile))
+    except:
+        print("Error: Issue with config file. Please check at : ", configFile)
+        exit(0)
 
+    try:
+        userName = str(configFileParser.lookup(args.conn_name)['user'])
+    except:
+        print("Error: No Username for the connection")
+        exit(0)
+
+    remoteFolder = 'Remote_' + args.conn_name
     localFolder = 'Local_' + args.conn_name
 
-    tempConfigFile = open(configFile, 'r')
-    for configLine in tempConfigFile:
-        if localFolder in configLine:
-            localFolderPath = configLine.split(' ')[4].split('\n')[0]
-            break
+    remoteFolderPath = '/home/' + userName + '/' + remoteFolder
+    localFolderPath = '/home/' + os.getlogin() + '/' + localFolder
 
-    # Check if this is already mounted
+    # Umount Local
     if os.path.exists(localFolderPath):
-        print('Umounting SSH Drive from : ', localFolderPath)
+        print('Info: Umounting Local from : ', localFolderPath)
         cmd = 'fusermount -u ' + localFolderPath
-        subprocess.call([cmd], shell=True)
+        subprocess.run([cmd], shell=True)
         cmd = 'rmdir ' + localFolderPath
-        subprocess.call([cmd], shell=True)
+        subprocess.run([cmd], shell=True)
 
     else:
-        print('Error: Can\'t Umount. Mount folder not found')
+        print('Error: Can\'t Umount.')
+        exit(0)
+
+    # Umount Remote
+    cmd = "ssh " + args.conn_name + " 'rm -rf " + remoteFolderPath + "'"
+    res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+
+    if res.returncode == 0:
+        print('Info: Umounting Remote from : ', remoteFolderPath)
+    else:
+        print("Error: Not able to umount remote folder")
         exit(0)
 
 
@@ -46,4 +66,3 @@ if __name__ == '__main__':
 
     args = check_arg(sys.argv[1:])
     mount_ssh(args)
-
