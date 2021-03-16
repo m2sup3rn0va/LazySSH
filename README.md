@@ -41,8 +41,8 @@
 
   ```sh
   sudo apt-get update; sudo apt-get upgrade -y; sudo apt-get install build-essential linux-headers-`uname -r` -y
-
-  sudo apt-get install paramiko sshfs -y
+  sudo apt-get install sshfs -y
+  pip3 install -U pip paramiko --user --no-warn-script-location
   ```
 
 - Steps:
@@ -131,24 +131,11 @@
 - I have created scripts which will help us mounting remote drives via `SSH`
 - `SSH-Mount` : [**SSH-Mount**](scripts/ssh-mount)
 - `SSH-Umount` : [**SSH-Umount**](scripts/ssh-umount)
-- **Points to Ponder** while using the scripts:
-  - These scripts will read the `config` file we created above
-  - We have to add two lines and comment that which tells us the path where we want to mount the remote drive and the path to remote drive
-  - `Config File` will look like:
-
-  ```txt
-  Host b0x
-    #	Remote_b0x /home/remoteuser/dump
-    #	Local_b0x /home/localuser/b0x
-  ```
-
-  - Here comments are mandatory else `SSH` parser will throw error when you run : `ssh b0x`
-  - Path of remote drive should mandatory start with : `# Remote_` and then the name of the host i.e `b0x` and same goes for local as well
-  - With this, the python script detects what to mount and where to mount
-  - Also, it't important to note that the path mentioned will not accept `~` or `$` sign and you need to provide complete path
 - **Reference**:
   - [**SSH File Transfers**](https://help.ubuntu.com/community/SSH/TransferFiles)
   - [**SSHFS**](https://help.ubuntu.com/community/SSHFS)
+
+> **NOTE**: Both the mount points are in `$HOME` directories
 
 ---
 
@@ -167,15 +154,13 @@
     User user
     Port 22
     Compression yes
-    IdentityFile ~/.ssh/id_rsa
+    IdentityFile $HOME/.ssh/id_rsa
     ForwardX11 yes
     Protocol 2
     StrictHostKeyChecking no
     LocalForward 31337 127.0.0.1:31337 # ---- Only if necessary
     RemoteForward 8000 127.0.0.1:8000 # ---- Only if necessary
     DynamicForward 8080 # ---- Only if necessary
-    # Remote_b0x /home/m2sup3rn0va/dump # ---- Mandatory if you want to use SSHFS
-    # Local_b0x /home/user/b0x # ---- Mandatory if you want to use SSHFS
   ```
 
   > **NOTE** : Please remove everything including and after `# ----`
